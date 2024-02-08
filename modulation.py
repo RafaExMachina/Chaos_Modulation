@@ -3,62 +3,74 @@
 import numpy as np
 import random
 
-#Mapa tenda  
-def tendaInclinada(alfa,Npontos):
-    x = [0] * Npontos
-    x[0] = np.random.random()*2-1
-    for i in range(Npontos - 1):
+def skewTent(alfa, Npoints):
+    """
+    Generates a chaotic signal using the skew tent map.
+    
+    Parameters:
+    - alfa: A parameter that controls the shape of the skew tent map.
+    - Npoints: The number of points in the generated signal.
+    
+    Returns:
+    A list of Npoints values representing the chaotic signal.
+    """
+    x = [0] * Npoints
+    # Initialize the first point with a random value between -1 and 1
+    x[0] = random.uniform(0, 1) * 2 - 1
+    
+    for i in range(Npoints - 1):
+        
         if (x[i] < alfa):
             x[i + 1] = (2 / (alfa + 1)) * x[i] + ((1 - alfa) / (alfa + 1))
+        
         elif (x[i] >= alfa):
             x[i + 1] = (2 / (alfa - 1)) * x[i] - ((alfa + 1) / (alfa - 1))
-    return x[:Npontos-1]
+    return x[:Npoints]
 
-#gerador aleatorio de uns e menos uns   
-def ramdomUmeUm(NumSimbolos):
-    mylist = np.random.randint(2, size=NumSimbolos)*2-1
+##########################################################################
+
+def CSK(nbits, alfa, BitSym):
+    """
+    Modulates a signal using Chaotic Shift Keying (CSK) with n bits.
     
-    return mylist
-
-#gerador aleatorio de uns e zeros
-def ramdomUmezeros(NumSimbolos):
-    mylist = np.random.randint(2, size=NumSimbolos)
+    Parameters:
+    - nbits: The number of bits to modulate.
+    - alfa: A parameter used in the chaotic signal generation.
+    - BitSym: The number of points in the chaotic signal per bit.
     
-    return mylist
+    Returns:
+    The modulated signal as an array.
+    """
+    # Generate a sequence of bits (with values -1 or 1)
+    bits = 2 * np.random.randint(2, size=nbits) - 1
+    NumSymbols = bits.size
+    # Generate a chaotic signal with a length based on the number of bits and BitSym
+    chaoticSignal = skewTent(alfa, BitSym * NumSymbols)
+    # Create a pulsed signal by repeating each bit BitSym times
+    pulsedSignal = np.kron(bits, np.ones(BitSym))
+    # Modulate the chaotic signal with the pulsed signal
+    return chaoticSignal * pulsedSignal 
 
-# produto vetor vetor
-def prod_vv(x, y):
-    """ Retorna o produto  entre x e y """
-    produto = []
-    for x, y in zip(x, y):
-        produto.append(x * y)
-    return produto
+##########################################################################
 
-def DCSK(beta,NumSimbolos,alfa):
-    myDCSK=[]
-    a=tendaInclinada(alfa,2*beta*NumSimbolos)
-    b=ramdomUmeUm(NumSimbolos)
-    for i in range(NumSimbolos):
-    #mylist[i*len(x[0]):(i+1)*len(x[0])]
-        myDCSK[i*2*beta:]=a[i*beta:(i+1)*beta]+prod_vv([b[i]]*beta, a[i*beta:(i+1)*beta])
-    return myDCSK
-
-def CSK(beta,NumSimbolos,alfa):
-
-    myCSK = []
-    a=tendaInclinada(alfa,2*beta*NumSimbolos)
-    b=ramdomUmeUm(NumSimbolos)
-    for i in range(NumSimbolos):
-    #mylist[i*len(x[0]):(i+1)*len(x[0])]
-        myCSK[i*2*beta:]=prod_vv([b[i]]*beta, a[i*beta:(i+1)*beta])
-    return myCSK
-
-def COOK(beta,NumSimbolos,alfa):
-
-    myCOOK = []
-    a=tendaInclinada(alfa,1*beta*NumSimbolos)
-    b=ramdomUmezeros(NumSimbolos)
-    for i in range(NumSimbolos):
-    #mylist[i*len(x[0]):(i+1)*len(x[0])]
-        myCOOK[i*1*beta:]=prod_vv([b[i]]*beta, a[i*beta:(i+1)*beta])
-    return myCOOK
+def COOK(nbits, alfa, BitSym):
+    """
+    Modulates a signal using Chaotic On-Off Keying (COOK) with n bits.
+    
+    Parameters:
+    - nbits: The number of bits to modulate.
+    - alfa: A parameter used in the chaotic signal generation.
+    - BitSym: The number of points in the chaotic signal per bit.
+    
+    Returns:
+    The modulated signal as an array.
+    """
+    # Generate a sequence of bits (with values 0 or 1)
+    bits =  np.random.randint(2, size=nbits) 
+    NumSymbols = bits.size
+    # Generate a chaotic signal with a length based on the number of bits and BitSym
+    chaoticSignal = skewTent(alfa, BitSym * NumSymbols)
+    # Create a pulsed signal by repeating each bit BitSym times
+    pulsedSignal = np.kron(bits, np.ones(BitSym))
+    # Modulate the chaotic signal with the pulsed signal
+    return chaoticSignal * pulsedSignal 
